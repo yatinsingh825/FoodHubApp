@@ -64,6 +64,12 @@ class SignUpViewModel @Inject constructor(private val foodApi: FoodApi) : ViewMo
         }
     }
 
+    fun onLoginClicked() {
+        viewModelScope.launch {
+            _navigationEvent.emit(SignUpNavigationEvent.NavigateToLogin)
+        }
+    }
+
     sealed class SignUpNavigationEvent {
         object NavigateToLogin : SignUpNavigationEvent()
         object NavigateToHome : SignUpNavigationEvent()

@@ -1,13 +1,7 @@
-package com.example.foodhub_android.ui.features.auth.signup
+package com.example.foodhub_android.ui.features.auth.login
 
 import android.widget.Toast
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.animation.togetherWith
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -35,28 +29,29 @@ import com.example.foodhub_android.ui.GroupSocialButtons
 import com.example.foodhub_android.ui.features.auth.AuthScreen
 import com.example.foodhub_android.ui.navigation.AuthScreen
 import com.example.foodhub_android.ui.navigation.Home
-import com.example.foodhub_android.ui.navigation.Login
+import com.example.foodhub_android.ui.navigation.SignUp
 import com.example.foodhub_android.ui.theme.Orange
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
-fun SignUpScreenRoute(
+fun SignInScreenRoute(
     navController: NavController,
-    viewModel: SignUpViewModel = hiltViewModel()
+    viewModel: SignInViewModel = hiltViewModel()
 ) {
-    SignUpScreenContent(
+    SignInScreenContent(
         navController = navController,
         viewModel = viewModel
     )
 }
 
 @Composable
-private fun SignUpScreenContent(
+private fun SignInScreenContent(
     navController: NavController,
-    viewModel: SignUpViewModel
+    viewModel: SignInViewModel
 ) {
+    val context = LocalContext.current
+
     Box(modifier = Modifier.fillMaxSize()) {
-        val name = viewModel.name.collectAsStateWithLifecycle()
         val email = viewModel.email.collectAsStateWithLifecycle()
         val password = viewModel.password.collectAsStateWithLifecycle()
         val errorMessage = remember { mutableStateOf<String?>(null) }
@@ -64,11 +59,11 @@ private fun SignUpScreenContent(
 
         val uiState = viewModel.uiState.collectAsState()
         when (uiState.value) {
-            is SignUpViewModel.SignUpEvent.Error -> {
+            is SignInViewModel.SignInEvent.Error -> {
                 loading.value = false
                 errorMessage.value = "Failed "
             }
-            is SignUpViewModel.SignUpEvent.Loading -> {
+            is SignInViewModel.SignInEvent.Loading -> {
                 loading.value = true
                 errorMessage.value = null
             }
@@ -80,18 +75,17 @@ private fun SignUpScreenContent(
 
         LaunchedEffect(true) {
             viewModel.navigationEvent.collectLatest { event ->
-                when(event) {
-                    is SignUpViewModel.SignUpNavigationEvent.NavigateToHome -> {
+                when (event) {
+                    is SignInViewModel.SignInNavigationEvent.NavigateToHome -> {
                         navController.navigate(Home) {
                             popUpTo(AuthScreen) {
                                 inclusive = true
                             }
                         }
                     }
-                    is SignUpViewModel.SignUpNavigationEvent.NavigateToLogin -> {
-                        navController.navigate(Login)
+                    is SignInViewModel.SignInNavigationEvent.NavigateToSignUp -> {
+                        navController.navigate(SignUp)
                     }
-                    else -> {}
                 }
             }
         }
@@ -111,25 +105,13 @@ private fun SignUpScreenContent(
         ) {
             Box(modifier = Modifier.weight(1f))
             Text(
-                text = stringResource(id = R.string.sign_up),
+                text = stringResource(id = R.string.sign_in),
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.size(20.dp))
-
-            FoodHubTextField(
-                value = name.value,
-                onValueChange = { viewModel.onNameChange(it) },
-                label = {
-                    Text(
-                        text = stringResource(id = R.string.Full_name),
-                        color = Color.Gray
-                    )
-                },
-                modifier = Modifier.fillMaxWidth()
-            )
 
             FoodHubTextField(
                 value = email.value,
@@ -157,31 +139,24 @@ private fun SignUpScreenContent(
             Text(text = errorMessage.value ?: "", color = Color.Red)
 
             Button(
-                onClick = viewModel::onSignUpClick,
+                onClick = { viewModel.onSignInClick() },
                 modifier = Modifier.height(48.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Orange)
             ) {
-                Box {
-                    AnimatedContent(
+                Box(modifier = Modifier.padding(horizontal = 32.dp)) {
+                    Crossfade(
                         targetState = loading.value,
-                        transitionSpec = {
-                            fadeIn(animationSpec = tween(300)) + scaleIn(initialScale = 0.8f) togetherWith
-                                    fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.8f)
-                        },
                         label = "Loading Animation"
                     ) { isLoading ->
                         if (isLoading) {
                             CircularProgressIndicator(
                                 color = Color.White,
-                                modifier = Modifier
-                                    .padding(horizontal = 32.dp)
-                                    .size(24.dp)
+                                modifier = Modifier.size(24.dp)
                             )
                         } else {
                             Text(
-                                text = stringResource(id = R.string.sign_up),
-                                color = Color.White,
-                                modifier = Modifier.padding(horizontal = 32.dp)
+                                text = stringResource(id = R.string.sign_in),
+                                color = Color.White
                             )
                         }
                     }
@@ -191,11 +166,11 @@ private fun SignUpScreenContent(
             Spacer(modifier = Modifier.size(16.dp))
 
             Text(
-                text = stringResource(id = R.string.already_have_an_account),
+                text = stringResource(id = R.string.donthave_an_account),
                 modifier = Modifier
                     .padding(8.dp)
                     .clickable {
-                        viewModel.onLoginClicked()
+                        viewModel.onSignUpClicked(context)
                     }
                     .fillMaxWidth(),
                 textAlign = TextAlign.Center
@@ -204,7 +179,9 @@ private fun SignUpScreenContent(
             GroupSocialButtons(
                 color = Color.Black,
                 onFacebookClick = {},
-                onGoogleClick = {}
+                onGoogleClick = {
+                    viewModel.onGoogleSignInClick(context)
+                }
             )
         }
     }
@@ -212,8 +189,8 @@ private fun SignUpScreenContent(
 
 @Preview(showBackground = true)
 @Composable
-private fun PreviewSignUpScreen() {
-    SignUpScreenContent(
+private fun PreviewSignInScreen() {
+    SignInScreenContent(
         navController = rememberNavController(),
         viewModel = hiltViewModel()
     )

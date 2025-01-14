@@ -8,6 +8,11 @@ import android.view.animation.OvershootInterpolator
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -18,12 +23,21 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.foodhub_android.data.FoodApi
 import com.example.foodhub_android.ui.features.auth.AuthScreen
-import com.example.foodhub_android.ui.features.auth.signup.SignUpScreen
+import com.example.foodhub_android.ui.features.auth.login.SignInScreenRoute
+import com.example.foodhub_android.ui.features.auth.signup.SignUpScreenRoute
+import com.example.foodhub_android.ui.navigation.AuthScreen
+import com.example.foodhub_android.ui.navigation.Home
+import com.example.foodhub_android.ui.navigation.Login
+import com.example.foodhub_android.ui.navigation.SignUp
 import com.example.foodhub_android.ui.theme.FoodHubAndroidTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -89,8 +103,52 @@ class MainActivity : ComponentActivity() {
         setContent {
             FoodHubAndroidTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Box(modifier = Modifier.padding(innerPadding)) {
-                        SignUpScreen()
+                    val navController = rememberNavController()
+                    NavHost(
+                        navController = navController,
+                        startDestination = AuthScreen,
+                        modifier = Modifier.padding(innerPadding),
+                        enterTransition = {
+                            slideIntoContainer(
+                                towards = AnimatedContentTransitionScope.SlideDirection.Up,
+                                animationSpec = tween(300)
+                            ) + fadeIn(animationSpec = tween(300))
+                        },
+                        exitTransition = {
+                            slideOutOfContainer(
+                                towards = AnimatedContentTransitionScope.SlideDirection.Up,
+                                animationSpec = tween(300)
+                            ) + fadeOut(animationSpec = tween(300))
+                        },
+                        popEnterTransition = {
+                            slideIntoContainer(
+                                towards = AnimatedContentTransitionScope.SlideDirection.Down,
+                                animationSpec = tween(300)
+                            ) + fadeIn(animationSpec = tween(300))
+                        },
+                        popExitTransition = {
+                            slideOutOfContainer(
+                                towards = AnimatedContentTransitionScope.SlideDirection.Down,
+                                animationSpec = tween(300)
+                            ) + fadeOut(animationSpec = tween(300))
+                        }
+                    ) {
+                        composable<SignUp> {
+                            SignUpScreenRoute(navController)
+                        }
+                        composable<AuthScreen> {
+                            AuthScreen(navController)
+                        }
+                        composable<Login> {
+                            SignInScreenRoute(navController)
+                        }
+                        composable<Home> {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color.Red)
+                            ) {}
+                        }
                     }
                 }
             }
