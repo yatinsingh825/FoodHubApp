@@ -20,4 +20,10 @@
     <string name="dont_have_an_account">dont have an account</string>
     <string name="donthave_an_account">dont have an account? SignUp</string>
     <string name="sign_in">Sign In</string>
+
+    <string name="facebook_app_id">1625112568103247</string>
+    <string name="fb_login_protocol_scheme">fb1234</string>
+    <string name="facebook_client_token">30b5a7b3e966bb41d8727594b28dde36</string>
+
+
 </resources>

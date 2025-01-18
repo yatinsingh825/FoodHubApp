@@ -203,8 +203,8 @@ private fun SignUpScreenContent(
 
             GroupSocialButtons(
                 color = Color.Black,
-                onFacebookClick = {},
-                onGoogleClick = {}
+                viewModel = viewModel
+
             )
         }
     }

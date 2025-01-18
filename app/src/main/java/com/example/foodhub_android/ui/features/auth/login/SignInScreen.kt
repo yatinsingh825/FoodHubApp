@@ -1,6 +1,7 @@
 package com.example.foodhub_android.ui.features.auth.login
 
 import android.widget.Toast
+import androidx.activity.ComponentActivity
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -23,6 +24,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.foodhub_android.MainActivity
 import com.example.foodhub_android.R
 import com.example.foodhub_android.ui.FoodHubTextField
 import com.example.foodhub_android.ui.GroupSocialButtons
@@ -177,11 +179,8 @@ private fun SignInScreenContent(
             )
 
             GroupSocialButtons(
-                color = Color.Black,
-                onFacebookClick = {},
-                onGoogleClick = {
-                    viewModel.onGoogleSignInClick(context)
-                }
+                color = Color.Black,viewModel
+
             )
         }
     }
